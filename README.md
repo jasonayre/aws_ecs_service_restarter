@@ -1,13 +1,24 @@
 # AWS ECS Service Restarter
-This allows you to periodically restart an ECS service via a cron job. It uses docker build arguments to specify the environment variables/flags.
+This allows you to periodically restart an ECS service via a cron job.
 
-### Building Example
-```docker build . --build-arg AWS_ACCESS_KEY_ID="12345" --build-arg AWS_SECRET_ACCESS_KEY="123123" --build-arg PORTAINER_SERVICE_NAME="subscriber" --build-arg PORTAINER_USERNAME="user" --build-arg PORTAINER_PASSWORD="password" --build-arg CRON_SCHEDULE="*/5 * * * *" -t PrivateDockerHubUser/myimage:latest```
+## Example Compose Usage
+Make sure to expose a secret named aws-access-key-id and aws-secret-access-key to the service. Everything else is handled via ENV variables
 
-
-ARG AWS_ACCESS_KEY_ID
-ARG AWS_SECRET_ACCESS_KEY
-ARG AWS_DEFAULT_REGION
-ARG SERVICE
-ARG CLUSTER
-ARG CRON_SCHEDULE
+``` yml
+secrets:
+aws-access-key-id:
+  file: './aws-access-key-id'
+aws-secret-access-key:
+  file: './aws-secret-access-key'
+services:
+  restarter:
+    image: peer60/aws_ecs_service_restarter:1.0
+    environment:
+      SERVICE: staging-SubscriberService-12345
+      CLUSTER: staging
+      AWS_DEFAULT_REGION: us-east-1
+      CRON_SCHEDULE: "*/1 * * * *"
+    secrets:
+      - aws-access-key-id
+      - aws-secret-access-key
+```
